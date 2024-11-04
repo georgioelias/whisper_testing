@@ -4,7 +4,7 @@ import os
 from io import BytesIO
 
 # Set up the OpenAI client with the API key
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+client = OpenAI(api_key=os.getenv["OPENAI_API_KEY"])
 
 st.title("Whisper Transcription Testing App")
 
