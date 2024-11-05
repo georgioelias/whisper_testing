@@ -2,9 +2,10 @@ import streamlit as st
 from openai import OpenAI
 import os
 from io import BytesIO
+from pydub import AudioSegment  # Import AudioSegment for format conversion
 
 # Set up the OpenAI client with the API key
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 st.title("Whisper Transcription Testing App")
 
@@ -64,7 +65,7 @@ if option == "Record Audio":
     except AttributeError:
         st.warning("Your Streamlit version doesn't support audio recording. Please upload an audio file instead.")
 elif option == "Upload Audio":
-    audio_file = st.file_uploader("Upload an audio file", type=["wav", "mp3", "m4a"])
+    audio_file = st.file_uploader("Upload an audio file", type=["wav", "mp3", "m4a", "ogg", "opus"])
 
 # Display audio file if available
 if audio_file:
@@ -77,8 +78,16 @@ transcribe_button = st.button("Transcribe")
 if transcribe_button and audio_file:
     # Read the uploaded file and prepare it for transcription
     audio_bytes = audio_file.read()
-    audio_data = BytesIO(audio_bytes)
-    audio_data.name = audio_file.name  # Set the name attribute for MIME type recognition
+    
+    # Convert .ogg or .opus to .wav if necessary
+    if audio_file.type in ["audio/ogg", "audio/opus"]:
+        audio_segment = AudioSegment.from_file(BytesIO(audio_bytes), format="ogg" if audio_file.type == "audio/ogg" else "opus")
+        audio_data = BytesIO()
+        audio_segment.export(audio_data, format="wav")
+        audio_data.name = audio_file.name.replace(".ogg", ".wav").replace(".opus", ".wav")
+    else:
+        audio_data = BytesIO(audio_bytes)
+        audio_data.name = audio_file.name  # Set the name attribute for MIME type recognition
 
     # Define granularity for JSON output
     granularity_options = {
