@@ -106,7 +106,6 @@ if transcribe_button and audio_file:
             prompt=st.session_state.saved_prompt or "",  # Use saved prompt if available, else empty
             response_format="verbose_json" if output_format == "json" else "text",
             temperature=temperature,
-            language="en",  # Default to English, or adapt this if dynamic language selection is added
             timestamp_granularities=timestamp_options if timestamp_options else None
         )
         
